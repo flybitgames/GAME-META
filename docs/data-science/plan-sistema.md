@@ -203,3 +203,41 @@ Después se añadirán las fases F2–F4 con prompts propios.
 1. Confirmar el presupuesto de créditos de Lovable y de IA.
 2. Elegir el dataset de prueba (si no, usamos el Titanic).
 3. Confirmar que la primera entrega es F1 (ingesta, perfilado y calidad).
+
+---
+
+## 10. Lecciones del libro "Data Analysis Using SQL and Excel" (Gordon S. Linoff, Wiley, 2008)
+
+Fuente: `/root/.claude/uploads/dbd8de5f-12ac-5ab2-923c-33f7abffae94/6f851099-Data_Analysis_Using_SQL_and_Excel.pdf` (690 páginas).
+Alcance de la lectura: índice completo, introducción, capítulo 1 (inicio), capítulo 2 (inicio y lecciones), capítulo 3 (conceptos básicos) y capítulo 12 (inicio). **No se ha leído el libro completo.** Los capítulos 4–11 solo se conocen por su índice.
+
+### 10.1 Ideas que el libro aporta al plan
+
+1. **La documentación dice lo que debería haber; la exploración dice lo que hay.** (Cap. 2.) Confirma M2 y M4: el sistema debe comparar el diccionario declarado por el usuario con lo que contienen los datos realmente.
+2. **Preguntas que la exploración debe responder** (Cap. 2): ¿qué valores hay en cada columna?, ¿qué valores inesperados aparecen?, ¿hay irregularidades de formato (horas faltantes, mayúsculas mezcladas)?, ¿qué relaciones hay entre columnas?, ¿tienen sentido las frecuencias? Esta lista debe ser la checklist de M3/M4.
+3. **Histogramas y agrupación de numéricas** (Cap. 2): para ver la distribución de valores numéricos hay que agruparlos en rangos, incluido el "tiling" en quintiles y deciles. Añadir a M3: histograma por cuantiles además del histograma de anchura fija.
+4. **Moda y valores extremos** (Cap. 2): min, max y moda (valor más frecuente) como parte del perfil de cada columna. Añadir a M3.
+5. **Resumir todas las columnas a la vez** (Cap. 2): el libro concluye que es más eficiente investigar todas las columnas en una sola pasada que una a una. Confirma que M3 debe calcular el perfil completo de una vez.
+6. **Significación estadística: la hipótesis nula** (Cap. 3): por defecto se asume que las diferencias se deben al azar; los datos deben demostrar lo contrario. Un p-valor bajo (5 % o 10 %) indica que es improbable que la diferencia sea casualidad. Esto obliga a que el sistema, al comparar grupos, diga **si la diferencia es significativa**, no solo cuál es mayor. Añadir a M5 y M9.
+7. **Diferencia de medias y de proporciones** (Cap. 3): el libro usa intervalos de confianza y diferencia de proporciones para comparar grupos de clientes. Son candidatos naturales para un módulo de "¿este grupo es distinto del resto?".
+8. **Chi-cuadrado para categóricas** (Cap. 3): compara si dos variables categóricas están relacionadas. Ya lo tenemos en M5 (asociaciones entre categóricas); el libro da la fórmula y su aplicación.
+9. **Qué es un "cliente" depende de la definición** (Cap. 12): cuenta, individuo, hogar o transacción anónima dan respuestas distintas. Para el sistema: que el usuario declare **qué representa cada fila** (una venta, un cliente, un evento) como parte del diccionario.
+10. **Firma del cliente** (Cap. 12): una tabla con una fila por entidad y columnas que resumen su comportamiento, con una fecha de corte para evitar fugas de información del futuro. Es un patrón útil para la F4 (predicciones) y para un "resumen por entidad" en M7.
+11. **Análisis de supervivencia y retención** (Caps. 6–7): cuánto dura un cliente y qué factores influyen. Útil si los datos tienen fechas de inicio y fin. Candidato para v2.
+12. **Análisis de cesta y reglas de asociación** (Cap. 9): qué productos se compran juntos. Candidato para v2 si hay datos de transacciones.
+13. **Regresión lineal, R² y sus límites** (Cap. 11): el libro advierte que R² mide el ajuste, no la calidad del modelo. Confirma que M10 debe explicar las métricas y sus limitaciones.
+
+### 10.2 Cambios concretos al plan
+
+- **M3 (perfilado):** añadir moda, histograma por cuantiles y perfil completo en una sola pasada.
+- **M4 (calidad):** añadir "irregularidades de formato" (mayúsculas mezcladas, espacios al inicio o final, fechas sin hora) y la comparación entre diccionario declarado y datos reales.
+- **M5 (relaciones):** comparaciones entre grupos con prueba de significación (p-valor) y chi-cuadrado para categóricas.
+- **M2 (diccionario):** pedir al usuario que declare qué representa cada fila (la unidad de análisis).
+- **M7 (dashboards):** "resumen por entidad" como vista derivada, siguiendo el patrón de firma del cliente.
+- **Nuevo módulo v2:** supervivencia/retención y reglas de asociación, si los datos lo permiten.
+
+### 10.3 Advertencias del libro que nos afectan
+
+- El libro usa Excel con límite de 65.536 filas. Ese límite ya no aplica; nuestro límite de 50 MB sigue siendo una decisión de rendimiento en el navegador.
+- Los ejemplos usan SQL Server y dialectos de 2008. Nuestro motor (DuckDB-WASM o Postgres) tiene sintaxis distinta; las consultas de ejemplo habrá que adaptarlas.
+- El libro no trata la IA generativa ni el lenguaje natural. Esas partes del plan (M8 y M9) no tienen respaldo en este libro.
