@@ -394,3 +394,23 @@ Riesgo técnico: no se puede meter todo el contenido de la carpeta en el prompt.
 
 ### 13.6 Pendiente antes de F9
 - Clave de API del servicio de email, dominio para el remitente y remitente de prueba.
+
+### 13.7 Decisión: envío por correo sin servidor propio ni servicio de email (F9)
+- **No se envía desde un servidor de Tabula.** Enviar desde nuestro dominio exigiría un servicio de email (como Resend) con clave y dominio verificado; el usuario ha pedido no añadir otro servidor.
+- **Envío desde la cuenta del propio usuario:**
+  - Botón "Enviar por correo": abre el cliente de correo del usuario (enlace `mailto:`) con asunto, texto y el enlace de lectura ya escritos. El usuario revisa y pulsa enviar.
+  - Botón "Compartir" en móvil: usa la hoja de compartir del sistema (Web Share API), que puede adjuntar la imagen o el PDF del dashboard.
+  - Botón "Copiar enlace" en todos los dispositivos.
+- **Límites que hay que decir al usuario:**
+  - `mailto:` no adjunta archivos. El PDF se descarga y el usuario lo adjunta a mano; en móvil, Web Share sí puede adjuntarlo.
+  - El correo sale de la cuenta del usuario, no de Tabula, y no hay confirmación de entrega.
+- Como el correo no pasa por Tabula, no hay riesgo de envíos masivos ni de datos enviados sin que el usuario lo vea.
+
+### 13.8 Orden actualizado
+| Fase | Contenido | Estado |
+|---|---|---|
+| F6 | Carpetas y asistente de carpeta | Terminada |
+| F7 | Dashboards y enlace de lectura | Terminada |
+| F8 | Predicciones con horizonte libre | Terminada |
+| F10 | Rediseño visual y voz | Terminada (voz sin probar en navegador real) |
+| F9 | Compartir por correo sin servidor (mailto, Web Share, copiar enlace) | En curso |
