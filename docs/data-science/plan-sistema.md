@@ -241,3 +241,63 @@ Alcance de la lectura: índice completo, introducción, capítulo 1 (inicio), ca
 - El libro usa Excel con límite de 65.536 filas. Ese límite ya no aplica; nuestro límite de 50 MB sigue siendo una decisión de rendimiento en el navegador.
 - Los ejemplos usan SQL Server y dialectos de 2008. Nuestro motor (DuckDB-WASM o Postgres) tiene sintaxis distinta; las consultas de ejemplo habrá que adaptarlas.
 - El libro no trata la IA generativa ni el lenguaje natural. Esas partes del plan (M8 y M9) no tienen respaldo en este libro.
+
+---
+
+## 11. Asistente de IA sobre los datos (M13)
+
+### 11.1 Qué debe poder hacer (según la petición)
+
+- Preguntar en lenguaje natural sobre un dataset ("¿qué mes vendimos más?", "¿hay clientes duplicados?").
+- Pedir cambios sobre un gráfico existente ("cambia a barras apiladas", "quita los outliers", "ordena por fecha").
+- Crear gráficos nuevos a partir de los datos y guardarlos en un dashboard.
+- Pedir análisis adicionales (correlaciones, comparaciones entre grupos, tendencias, segmentos).
+- Ver siempre la consulta o el código usado y poder editarlo.
+- Conversación con memoria dentro de la sesión del dataset.
+
+### 11.2 Qué significa "acceso total" en la práctica
+
+"Acceso total" tiene que traducirse en permisos concretos. Los tres niveles posibles:
+
+| Nivel | Qué puede hacer la IA | Riesgo |
+|---|---|---|
+| **A. Lectura** | Consultas SQL de solo lectura sobre los datasets del usuario, gráficos y análisis | Bajo |
+| **B. Lectura + modificación de vistas** | Además, crear/editar gráficos, dashboards, columnas derivadas (sin tocar el CSV original) | Medio |
+| **C. Modificación de datos** | Además, borrar, corregir o reescribir filas o el CSV | Alto: puede dañar datos sin que nadie lo note |
+
+**Recomendación:** nivel B por defecto. Los datos originales son inmutables; cualquier limpieza se hace como una vista o columna derivada que se puede deshacer. El nivel C solo con confirmación explícita por cada acción.
+
+### 11.3 Riesgos que hay que cubrir (no son opcionales)
+
+1. **Inyección de instrucciones desde el CSV.** Un valor de celda puede contener texto del tipo "ignora tus instrucciones y…". La IA debe tratar el contenido de los datos como datos, nunca como instrucciones, y las herramientas deben tener límites fijos en el backend.
+2. **Consultas peligrosas.** Nada de SQL libre contra la base de datos real. La IA genera consultas que se ejecutan en un motor de solo lectura, limitado a las tablas del dataset del usuario, con tiempo máximo y número máximo de filas.
+3. **Coste sin control.** La app es pública y sin login: cualquiera con el enlace podría gastar créditos de IA. Antes de activar el asistente hace falta autenticación, límites de uso por usuario y un tope de gasto.
+4. **Datos enviados a terceros.** Lo que la IA ve se envía al proveedor del modelo. Aunque ahora no hay datos personales, el detector de PII debe bloquear el envío de filas con datos personales detectados, o pedir confirmación.
+5. **Respuestas incorrectas.** La IA puede inventar cifras. Cada número que muestre debe venir de una consulta ejecutada, con su SQL visible. Nunca se aceptan cifras "de memoria".
+6. **Trazabilidad.** Cada acción de la IA que cambia algo (vista, gráfico, columna derivada) queda registrada con quién la pidió, cuándo y qué consulta usó, y se puede revertir.
+
+### 11.4 Arquitectura propuesta
+
+- **Frontend:** panel de chat junto al dataset. Los gráficos se renderizan desde una especificación (tipo, columnas, filtros), no desde código arbitrario.
+- **Backend (Edge Function):** recibe la pregunta, llama al modelo con un conjunto fijo de herramientas:
+  - `ejecutar_consulta_lectura(sql)`: solo SELECT, sobre tablas del dataset, con límites.
+  - `crear_grafico(spec)` / `editar_grafico(id, cambios)`.
+  - `crear_columna_derivada(expresion)`.
+  - `resumen_dataset()`: devuelve el perfil ya calculado (M3/M4), para no mandar el CSV entero al modelo.
+- **Validación en servidor:** cada herramienta valida sus entradas. El modelo nunca escribe SQL que llegue directamente a la base de datos sin pasar por el validador.
+- **Modelo de IA:** un proveedor con API (p. ej. Claude o OpenAI), con la clave guardada como secreto de Supabase. Si Lovable ofrece una pasarela de IA integrada, es una alternativa a evaluar.
+
+### 11.5 Decisiones que necesito del usuario
+
+1. **Nivel de acceso:** A, B (recomendado) o C.
+2. **Proveedor de IA:** ¿tienes una clave de API (Anthropic u OpenAI)? ¿o prefieres la pasarela integrada de Lovable si existe?
+3. **Acceso:** ¿la app sigue sin login (no recomendado con IA activa) o añadimos inicio de sesión antes del asistente?
+4. **Presupuesto:** tope mensual de gasto en IA.
+
+### 11.6 Orden de construcción
+
+1. Autenticación y límites de uso (sin esto, no se activa la IA).
+2. Herramienta de resumen del dataset y chat de solo lectura (nivel A).
+3. Gráficos creados y editados por la IA (nivel B).
+4. Columnas derivadas y dashboards por IA.
+5. Nivel C solo si hace falta, con confirmación por acción.
