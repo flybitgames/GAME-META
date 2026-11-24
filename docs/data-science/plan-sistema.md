@@ -348,3 +348,49 @@ Riesgo técnico: no se puede meter todo el contenido de la carpeta en el prompt.
 1. ¿Envío por correo ahora (F9) o más adelante? Requiere dominio y cuenta de email.
 2. ¿Qué horizonte de predicción necesitas por defecto (semanas, meses, un año)?
 3. ¿Compartir con otras personas en v1 o solo con enlace de lectura?
+
+### 12.7 Decisiones tomadas
+
+1. **Envío por correo: ahora (F9 adelantada).** Requiere un servicio de email (p. ej. Resend), una clave de API y un dominio verificado. Pendiente de que el usuario facilite esos datos.
+2. **Horizonte de predicción: libre, elegido por el usuario en cada petición** ("próximo mes", "hasta diciembre de 2027"). El sistema avisa cuando el horizonte es más largo que los datos históricos disponibles, porque la incertidumbre crece.
+3. **Compartir: enlace de solo lectura, presentable.** Vista limpia de dashboard a pantalla completa, sin controles de edición, con caducidad opcional y sin datos sensibles. Sin edición ni comentarios por ahora.
+
+---
+
+## 13. Diseño visual y asistente con voz (M18)
+
+### 13.1 Interfaz
+- Estilo limpio inspirado en Apple: mucho espacio en blanco, tipografía del sistema, bordes suaves, sombras sutiles, un solo color de acento.
+- Modo claro y oscuro, siguiendo la preferencia del sistema.
+- Transiciones suaves al cambiar de pantalla, al abrir gráficos y al aparecer resultados. Respeta la opción "reducir movimiento" del sistema operativo.
+- Diseño adaptable a móvil, tableta y escritorio, sin scroll horizontal.
+
+### 13.2 Asistente con animación al hablar
+- Panel de asistente con un orbe o indicador animado, al estilo de Siri:
+  - En reposo: pulso suave.
+  - Escuchando (entrada por voz): ondas que reaccionan al volumen.
+  - Pensando: animación de rotación lenta.
+  - Respondiendo: el orbe varía de forma al ritmo de la respuesta que se va escribiendo.
+- **Entrada y salida por voz** con la API de voz del navegador (reconocimiento y síntesis). Funciona en navegadores modernos; en los que no existe, el asistente sigue funcionando por texto.
+- Las cifras siempre aparecen también como texto, para que se puedan copiar y revisar.
+
+### 13.3 Compartir: enlace de lectura
+- Botón "Compartir" en cada dashboard: genera un enlace de solo lectura con fecha de caducidad opcional.
+- El enlace muestra la versión presentable, sin login, sin controles de edición y sin el chat.
+- Revocar el enlace en cualquier momento.
+
+### 13.4 Lo que no cambia
+- Las salvaguardas del asistente (solo lectura, límites, sin datos personales) siguen aplicándose a la voz y al texto por igual.
+
+### 13.5 Orden de construcción (actualizado)
+
+| Fase | Contenido |
+|---|---|
+| F6 | Carpetas y asistente a nivel de carpeta (en curso) |
+| F7 | Dashboards manuales y del asistente, exportación PNG/PDF |
+| F8 | Predicciones con horizonte libre, intervalo y prueba hacia atrás |
+| F9 | Enlace de lectura y envío por correo con confirmación |
+| F10 | Rediseño visual y asistente con voz (puede empezar en paralelo con F7) |
+
+### 13.6 Pendiente antes de F9
+- Clave de API del servicio de email, dominio para el remitente y remitente de prueba.
