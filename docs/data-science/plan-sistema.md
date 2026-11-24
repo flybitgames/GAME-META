@@ -301,3 +301,50 @@ Alcance de la lectura: índice completo, introducción, capítulo 1 (inicio), ca
 3. Gráficos creados y editados por la IA (nivel B).
 4. Columnas derivadas y dashboards por IA.
 5. Nivel C solo si hace falta, con confirmación por acción.
+
+---
+
+## 12. Carpetas, dashboards, predicciones y compartir (M14–M17)
+
+### 12.1 Carpetas (M14)
+- Jerarquía de carpetas por usuario (p. ej. "Naranjal S.A." → "Ventas 2025", "Clientes").
+- Cada carpeta contiene varios datasets. Se pueden subir CSV nuevos a la misma carpeta.
+- **El asistente trabaja a nivel de carpeta**: sabe qué datasets hay, sus columnas, su diccionario y sus perfiles, y puede cruzarlos.
+- Para cruzar datasets hace falta una relación declarada (p. ej. `ventas.cliente_id` = `clientes.id`). El sistema **sugiere** relaciones por nombre y valores, y el usuario las confirma.
+- Permisos por carpeta con RLS (v1: solo el propietario; compartir con otros usuarios, v2).
+
+Riesgo técnico: no se puede meter todo el contenido de la carpeta en el prompt. El asistente recibe el **catálogo** (esquemas, perfiles, relaciones) y consulta los datos con SQL, como ya está planteado en M13.
+
+### 12.2 Dashboards (M15)
+- Creación **manual** (arrastrar gráficos, filtros) o **por el asistente** a partir de una petición ("dashboard de previsión de ventas por ciudad para 2026").
+- Un dashboard pertenece a una carpeta y puede usar datasets de esa carpeta.
+- Cada gráfico se guarda como especificación (tipo, columnas, agregación, filtros); el dashboard se recalcula al abrirse.
+- Versión para presentar: vista a pantalla completa, sin controles, y exportación a PNG/PDF.
+
+### 12.3 Predicciones (M16)
+- Petición en lenguaje natural: "¿cuánto se venderá en Valdeolivo el próximo trimestre?".
+- Método v1: **series temporales** sobre datos agregados (suavizado exponencial o tendencia + estacionalidad semanal/mensual), implementable en JavaScript dentro de Lovable.
+- Para cada predicción se muestra: valor esperado, **intervalo de incertidumbre**, periodo de entrenamiento, y una **prueba hacia atrás** (cuánto habría acertado el método en el pasado). Si el error es alto, se avisa.
+- Para predicciones de otro tipo (clasificar clientes, factores que influyen), el método queda en v2 con un servicio Python externo.
+
+**Límite importante:** una predicción con pocos datos o con un cambio brusco de negocio no es fiable. El sistema debe decirlo en lugar de dar una cifra segura.
+
+### 12.4 Compartir y enviar (M17)
+- Exportar dashboard o gráfico a PNG, PDF o HTML para presentaciones.
+- **Enlace de solo lectura** con caducidad, generado por el propietario.
+- **Envío por correo**: requiere un servicio de email (p. ej. Resend) con dominio verificado. Cada envío se confirma antes de salir, porque ya no se puede retirar.
+- Exportar datos (CSV) solo para el propietario de la carpeta.
+
+### 12.5 Orden de construcción por fases
+
+| Fase | Contenido | Por qué en este orden |
+|---|---|---|
+| **F6** | Carpetas, datasets múltiples, asistente a nivel de carpeta, relaciones sugeridas | Base de todo lo demás |
+| **F7** | Dashboards manuales y creados por el asistente, exportación PNG/PDF | Lo que se presenta |
+| **F8** | Predicciones de series temporales con intervalo y prueba hacia atrás | Requiere datos ya organizados |
+| **F9** | Enlaces de solo lectura y envío por correo con confirmación | Lo que sale del sistema, al final y con control |
+
+### 12.6 Decisiones pendientes
+1. ¿Envío por correo ahora (F9) o más adelante? Requiere dominio y cuenta de email.
+2. ¿Qué horizonte de predicción necesitas por defecto (semanas, meses, un año)?
+3. ¿Compartir con otras personas en v1 o solo con enlace de lectura?
